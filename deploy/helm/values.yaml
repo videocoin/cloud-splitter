@@ -1,0 +1,24 @@
+replicasCount: 1
+maxUnavailableCount: 0
+
+image:
+  repository: gcr.io/videocoin-network/splitter
+  tag: latest
+  pullPolicy: Always
+
+config: {}
+
+service:
+  type: ClusterIP
+  externalPrivateRpcPort: 5103
+  internalPrivateRpcPort: 5103
+
+autoscaler:
+  minCount: 1
+  maxCount: 10
+  targets:
+    targetCPUUtilizationPercentage: 70
+
+secrets:
+  secret: ""
+  sentryDsn: ""

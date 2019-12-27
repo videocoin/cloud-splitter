@@ -1,0 +1,11 @@
+FROM  golang:1.12
+
+MAINTAINER VideoCoin
+
+RUN apt-get update && \
+    apt-get  install -y  ffmpeg
+
+
+WORKDIR /go/src/github.com/videocoin/cloud-splitter
+
+CMD go run cmd/main.go

@@ -1,0 +1,73 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicasCount }}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: {{ .Values.maxUnavailableCount }}
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.internalPrivateRpcPort }}
+          readinessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalPrivateRpcPort }}"]
+            initialDelaySeconds: 5
+          livenessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalPrivateRpcPort }}"]
+            initialDelaySeconds: 10
+          env:
+            - name: JAEGER_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: JAEGER_AGENT_PORT
+              value: "6831"
+            - name: PRIVATE_RPC_ADDR
+              value: 0.0.0.0:{{ .Values.service.internalPrivateRpcPort }}
+#            - name: DOWNLOAD_DIR
+#              value: "/uploads/downloads"
+            - name: OUTPUT_DIR
+              value: "/tmp"
+            - name: BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: bucket
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: sentryDsn
+          {{- if .Values.resources }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}
+        - name: secrets
+          secret:
+            secretName: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}-fs
+          persistentVolumeClaim:
+            claimName: {{ .Chart.Name }}-fs
+            readOnly: true
+      nodeSelector:
+        cloud.google.com/gke-nodepool: api
