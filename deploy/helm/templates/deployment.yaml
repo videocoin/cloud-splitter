@@ -22,14 +22,17 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.internalPrivateRpcPort }}
+            - containerPort: {{ .Values.service.internalRpcPort }}
+          volumeMounts:
+            - mountPath: /data/studio
+              name: {{ .Chart.Name }}-fs
           readinessProbe:
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalPrivateRpcPort }}"]
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalRpcPort }}"]
             initialDelaySeconds: 5
           livenessProbe:
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalPrivateRpcPort }}"]
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalRpcPort }}"]
             initialDelaySeconds: 10
           env:
             - name: JAEGER_AGENT_HOST
@@ -38,17 +41,15 @@ spec:
                   fieldPath: status.hostIP
             - name: JAEGER_AGENT_PORT
               value: "6831"
-            - name: PRIVATE_RPC_ADDR
-              value: 0.0.0.0:{{ .Values.service.internalPrivateRpcPort }}
-#            - name: DOWNLOAD_DIR
-#              value: "/uploads/downloads"
-            - name: OUTPUT_DIR
-              value: "/tmp"
-            - name: BUCKET
+            - name: RPC_ADDR
+              value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
+            - name: HLS_DIR
+              value: /data/studio/hls
+            - name: MQURI
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: bucket
+                  key: mqUri
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
