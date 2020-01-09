@@ -19,17 +19,14 @@ func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*p
 	localMediaDir := filepath.Join(s.hlsDir, req.StreamID)
 	os.MkdirAll(localMediaDir, 0777)
 
-	err := splitMediafile(req.Filepath, localMediaDir)
-	if err != nil {
-		s.logger.Error(err)
-		return nil, err
-	}
+	go func(filepath string, hlsDir string) {
+		err := splitMediafile(filepath, hlsDir)
+		if err != nil {
+			s.logger.Errorf("failed to split media file: %s", err)
+			return
+		}
+	}(req.Filepath, localMediaDir)
 
-	//stream, err := s.streams.GetStreamByID(ctx, req.StreamID)
-	//if err != nil {
-	//	logFailedTo(logger, "get stream", err)
-	//	return nil, rpc.ErrRpcInternal
-	//}
 	return &protoempty.Empty{}, nil
 }
 
