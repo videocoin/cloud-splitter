@@ -13,7 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 	splitterv1 "github.com/videocoin/cloud-api/splitter/v1"
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 )
 
 func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*protoempty.Empty, error) {
@@ -38,10 +37,10 @@ func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*p
 
 		logger.Info("split has beend completed")
 
-		streamReq := &pstreamsv1.UpdateStatusRequest{ID: req.StreamID, Status: streamsv1.StreamStatusNew}
-		_, err = s.streams.UpdateStatus(context.Background(), streamReq)
+		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamID}
+		_, err = s.streams.Publish(context.Background(), streamReq)
 		if err != nil {
-			logger.Errorf("failed to update stream status: %s", err)
+			logger.Errorf("failed to publish stream: %s", err)
 			return
 		}
 
