@@ -5,7 +5,6 @@ go 1.12
 require (
 	cloud.google.com/go/storage v1.4.0 // indirect
 	github.com/gogo/protobuf v1.3.1
-	github.com/google/btree v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/sirupsen/logrus v1.4.2
