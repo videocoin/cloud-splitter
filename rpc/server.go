@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	splitterv1 "github.com/videocoin/cloud-api/splitter/v1"
+	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -13,17 +14,19 @@ import (
 )
 
 type RpcServerOpts struct {
-	Addr   string
-	Logger *logrus.Entry
-	HlsDir string
+	Addr    string
+	Logger  *logrus.Entry
+	HlsDir  string
+	Streams pstreamsv1.StreamsServiceClient
 }
 
 type RpcServer struct {
-	addr   string
-	hlsDir string
-	logger *logrus.Entry
-	grpc   *grpc.Server
-	listen net.Listener
+	addr    string
+	hlsDir  string
+	logger  *logrus.Entry
+	grpc    *grpc.Server
+	listen  net.Listener
+	streams pstreamsv1.StreamsServiceClient
 }
 
 func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
@@ -36,11 +39,12 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		return nil, err
 	}
 	rpcServer := &RpcServer{
-		addr:   opts.Addr,
-		hlsDir: opts.HlsDir,
-		logger: opts.Logger.WithField("system", "splitterv1"),
-		grpc:   grpcServer,
-		listen: listen,
+		addr:    opts.Addr,
+		hlsDir:  opts.HlsDir,
+		logger:  opts.Logger.WithField("system", "splitterv1"),
+		grpc:    grpcServer,
+		listen:  listen,
+		streams: opts.Streams,
 	}
 
 	splitterv1.RegisterSplitterServiceServer(grpcServer, rpcServer)
