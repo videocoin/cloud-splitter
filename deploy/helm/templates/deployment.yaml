@@ -50,6 +50,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: mqUri
+            - name: STREAMS_RPC_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: streamsRpcAddr
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
