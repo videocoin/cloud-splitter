@@ -44,7 +44,7 @@ spec:
             - name: RPC_ADDR
               value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
             - name: HLS_DIR
-              value: /data/studio/files
+              value: /data/studio/hls
             - name: MQURI
               valueFrom:
                 secretKeyRef:
