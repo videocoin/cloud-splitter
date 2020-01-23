@@ -20,7 +20,10 @@ func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*p
 	span.SetTag("id", req.StreamID)
 
 	localMediaDir := filepath.Join(s.hlsDir, req.StreamID)
-	os.MkdirAll(localMediaDir, 0777)
+	err := os.MkdirAll(localMediaDir, 0777)
+	if err != nil {
+		return nil, err
+	}
 
 	go func(filepath string, hlsDir string) {
 		logger := s.logger.WithFields(logrus.Fields{
