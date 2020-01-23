@@ -62,8 +62,6 @@ func (s *RpcServer) splitMediafile(filepath string, hlsDir string) error {
 		"1",
 		"-bsf:v",
 		"h264_mp4toannexb",
-		"-hls_playlist_type",
-		"vod",
 		"-f",
 		"hls",
 		output,
