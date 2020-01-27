@@ -38,7 +38,7 @@ func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*p
 			return
 		}
 
-		logger.Info("split has beend completed")
+		logger.Info("split has been completed")
 
 		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamID}
 		_, err = s.streams.Publish(context.Background(), streamReq)
