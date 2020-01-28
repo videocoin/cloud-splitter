@@ -53,7 +53,6 @@ func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*p
 }
 
 func (s *RpcServer) splitMediafile(filepath string, hlsDir string) error {
-	output := hlsDir + "/index.m3u8"
 	args := []string{
 		"-i",
 		filepath,
@@ -65,11 +64,11 @@ func (s *RpcServer) splitMediafile(filepath string, hlsDir string) error {
 		"1",
 		"-bsf:v",
 		"h264_mp4toannexb",
-		"-hls_playlist_type",
-		"vod",
 		"-f",
-		"hls",
-		output,
+		"segment",
+		"-segment_list",
+		hlsDir + "/index.m3u8",
+		hlsDir + "/%d.ts",
 	}
 	fmt.Println("ffmpeg " + strings.Join(args, " "))
 	cmd := exec.Command("ffmpeg", args...)
