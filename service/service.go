@@ -21,10 +21,11 @@ func NewService(cfg *Config) (*Service, error) {
 	streams := pstreamsv1.NewStreamsServiceClient(conn)
 
 	rpcConfig := &rpc.RpcServerOpts{
-		HlsDir:  cfg.HLSDir,
-		Addr:    cfg.RPCAddr,
-		Logger:  cfg.Logger.WithField("system", "rpc"),
-		Streams: streams,
+		HlsDir:      cfg.HLSDir,
+		Addr:        cfg.RPCAddr,
+		Logger:      cfg.Logger.WithField("system", "rpc"),
+		Streams:     streams,
+		SegmentTime: cfg.SegmentTime,
 	}
 
 	ebConfig := &eventbus.Config{

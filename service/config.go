@@ -13,4 +13,5 @@ type Config struct {
 	MQURI          string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
 	StreamsRPCAddr string `required:"true" envconfig:"STREAMS_RPC_ADDR" default:"127.0.0.1:5102"`
 	HLSDir         string `required:"true" default:"/tmp/hls" envconfig:"HLS_DIR"`
+	SegmentTime    int    `default:"10"`
 }

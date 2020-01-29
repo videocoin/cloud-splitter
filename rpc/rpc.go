@@ -2,10 +2,10 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	protoempty "github.com/gogo/protobuf/types"
@@ -67,10 +67,14 @@ func (s *RpcServer) splitMediafile(filepath string, hlsDir string) error {
 		"-f",
 		"segment",
 		"-segment_list",
+		"-segment_time",
+		strconv.Itoa(s.segmentTime),
 		hlsDir + "/index.m3u8",
 		hlsDir + "/%d.ts",
 	}
-	fmt.Println("ffmpeg " + strings.Join(args, " "))
+
+	s.logger.Infof("ffmpeg: %s", strings.Join(args, " "))
+
 	cmd := exec.Command("ffmpeg", args...)
 	_, err := cmd.CombinedOutput()
 	if err != nil {

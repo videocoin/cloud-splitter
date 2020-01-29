@@ -14,19 +14,21 @@ import (
 )
 
 type RpcServerOpts struct {
-	Addr    string
-	Logger  *logrus.Entry
-	HlsDir  string
-	Streams pstreamsv1.StreamsServiceClient
+	Addr        string
+	Logger      *logrus.Entry
+	HlsDir      string
+	Streams     pstreamsv1.StreamsServiceClient
+	SegmentTime int
 }
 
 type RpcServer struct {
-	addr    string
-	hlsDir  string
-	logger  *logrus.Entry
-	grpc    *grpc.Server
-	listen  net.Listener
-	streams pstreamsv1.StreamsServiceClient
+	addr        string
+	hlsDir      string
+	logger      *logrus.Entry
+	grpc        *grpc.Server
+	listen      net.Listener
+	streams     pstreamsv1.StreamsServiceClient
+	segmentTime int
 }
 
 func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
@@ -39,12 +41,13 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		return nil, err
 	}
 	rpcServer := &RpcServer{
-		addr:    opts.Addr,
-		hlsDir:  opts.HlsDir,
-		logger:  opts.Logger.WithField("system", "splitterv1"),
-		grpc:    grpcServer,
-		listen:  listen,
-		streams: opts.Streams,
+		addr:        opts.Addr,
+		hlsDir:      opts.HlsDir,
+		logger:      opts.Logger.WithField("system", "splitterv1"),
+		grpc:        grpcServer,
+		listen:      listen,
+		streams:     opts.Streams,
+		segmentTime: opts.SegmentTime,
 	}
 
 	splitterv1.RegisterSplitterServiceServer(grpcServer, rpcServer)
