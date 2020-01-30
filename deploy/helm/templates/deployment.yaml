@@ -45,6 +45,8 @@ spec:
               value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
             - name: HLS_DIR
               value: /data/studio/hls
+            - name: SPLITTER_SEGMENTTIME
+              value: "30"
             - name: MQURI
               valueFrom:
                 secretKeyRef:
