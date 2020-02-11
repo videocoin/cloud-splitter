@@ -7,6 +7,8 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
+	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
+	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-pkg/logger"
 	"github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-splitter/service"
@@ -33,19 +35,25 @@ func main() {
 		defer closer.Close()
 	}
 
-	cfg := &service.Config{
+	config := &service.Config{
 		Name:    ServiceName,
 		Version: Version,
 	}
 
-	err = envconfig.Process(ServiceName, cfg)
+	err = envconfig.Process(ServiceName, config)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	cfg.Logger = log
+	config.Logger = log
 
-	svc, err := service.NewService(cfg)
+	conn, err := grpcutil.Connect(config.StreamsRPCAddr, config.Logger.WithField("system", "streamscli"))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	streams := pstreamsv1.NewStreamsServiceClient(conn)
+
+	svc, err := service.NewService(config, streams)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
