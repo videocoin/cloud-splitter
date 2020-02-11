@@ -2,7 +2,6 @@ package service
 
 import (
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
-	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-splitter/eventbus"
 	"github.com/videocoin/cloud-splitter/rpc"
 )
@@ -13,13 +12,7 @@ type Service struct {
 	eb  *eventbus.EventBus
 }
 
-func NewService(cfg *Config) (*Service, error) {
-	conn, err := grpcutil.Connect(cfg.StreamsRPCAddr, cfg.Logger.WithField("system", "streamscli"))
-	if err != nil {
-		return nil, err
-	}
-	streams := pstreamsv1.NewStreamsServiceClient(conn)
-
+func NewService(cfg *Config, streams pstreamsv1.StreamsServiceClient) (*Service, error) {
 	rpcConfig := &rpc.RpcServerOpts{
 		HlsDir:      cfg.HLSDir,
 		Addr:        cfg.RPCAddr,
