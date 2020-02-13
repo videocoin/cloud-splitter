@@ -50,8 +50,7 @@ jobs:
       - run:
           name: test
           command: |
-            make docker-test-build
-            make docker-test-run
+            make tests
       - save_cache:
           key: v1-repo-{{ .Branch }}-{{ .Revision }}
           paths:

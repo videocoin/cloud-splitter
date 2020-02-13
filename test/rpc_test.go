@@ -17,7 +17,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	splitterv1 "github.com/videocoin/cloud-api/splitter/v1"
 	"github.com/videocoin/cloud-pkg/logger"
-	"github.com/videocoin/cloud-splitter/mock"
 	"github.com/videocoin/cloud-splitter/rpc"
 	"github.com/videocoin/cloud-splitter/service"
 )
@@ -49,7 +48,7 @@ func (suite *APITestSuite) SetupSuite() {
 	}
 
 	suite.config.Logger = log
-	privateStreamManager := new(mock.MockPrivateStreamManager)
+	privateStreamManager := new(MockPrivateStreamManager)
 
 	rpcConfig := &rpc.RpcServerOpts{
 		HlsDir:      suite.config.HLSDir,
@@ -68,8 +67,8 @@ func TestAPITestSuite(t *testing.T) {
 	suite.Run(t, new(APITestSuite))
 }
 
-func (suite *APITestSuite) TestUpload_FromFile() {
-	req := &splitterv1.SplitRequest{Filepath: "testdata/small.mp4", StreamID: mock.STREAM_ID}
+func (suite *APITestSuite) TestSplit() {
+	req := &splitterv1.SplitRequest{Filepath: "testdata/small.mp4", StreamID: STREAM_ID}
 	span, _ := opentracing.StartSpanFromContext(context.Background(), "test")
 	defer span.Finish()
 	ctx := opentracing.ContextWithSpan(context.Background(), span)
@@ -79,7 +78,7 @@ func (suite *APITestSuite) TestUpload_FromFile() {
 		assert.FailNow(suite.T(), err.Error())
 	}
 	assert.Equal(suite.T(), &protoempty.Empty{}, resp)
-	if _, err := os.Stat(filepath.Join(suite.config.HLSDir, mock.STREAM_ID)); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(suite.config.HLSDir, STREAM_ID)); os.IsNotExist(err) {
 		assert.FailNow(suite.T(), err.Error())
 	}
 
