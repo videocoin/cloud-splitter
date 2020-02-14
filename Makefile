@@ -29,6 +29,12 @@ deps:
 tests:
 	docker build -t tests -f Dockerfile.test .
 
+lint:
+	golangci-lint run -v
+
+docker-lint:
+	docker build -f Dockerfile.lint .
+
 docker-build:
 	docker build -t gcr.io/${GCP_PROJECT}/${NAME}:${VERSION} -f Dockerfile .
 
