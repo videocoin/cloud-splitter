@@ -15,7 +15,7 @@ import (
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 )
 
-func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*protoempty.Empty, error) {
+func (s *Server) Split(ctx context.Context, req *splitterv1.SplitRequest) (*protoempty.Empty, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.StreamID)
 
@@ -52,7 +52,7 @@ func (s *RpcServer) Split(ctx context.Context, req *splitterv1.SplitRequest) (*p
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) splitMediafile(filepath string, hlsDir string) error {
+func (s *Server) splitMediafile(filepath string, hlsDir string) error {
 	args := []string{
 		"-i",
 		filepath,

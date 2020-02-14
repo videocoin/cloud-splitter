@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type RpcServerOpts struct {
+type ServerOpts struct {
 	Addr        string
 	Logger      *logrus.Entry
 	HlsDir      string
@@ -21,7 +21,7 @@ type RpcServerOpts struct {
 	SegmentTime int
 }
 
-type RpcServer struct {
+type Server struct {
 	addr        string
 	hlsDir      string
 	logger      *logrus.Entry
@@ -31,32 +31,32 @@ type RpcServer struct {
 	segmentTime int
 }
 
-func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
+func NewServer(opts *ServerOpts) (*Server, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
-	grpcServer := grpc.NewServer(grpcOpts...)
+	gServer := grpc.NewServer(grpcOpts...)
 	healthService := health.NewServer()
-	grpc_health_v1.RegisterHealthServer(grpcServer, healthService)
+	grpc_health_v1.RegisterHealthServer(gServer, healthService)
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
 	}
-	rpcServer := &RpcServer{
+	server := &Server{
 		addr:        opts.Addr,
 		hlsDir:      opts.HlsDir,
 		logger:      opts.Logger.WithField("system", "splitterv1"),
-		grpc:        grpcServer,
+		grpc:        gServer,
 		listen:      listen,
 		streams:     opts.Streams,
 		segmentTime: opts.SegmentTime,
 	}
 
-	splitterv1.RegisterSplitterServiceServer(grpcServer, rpcServer)
-	reflection.Register(grpcServer)
+	splitterv1.RegisterSplitterServiceServer(gServer, server)
+	reflection.Register(gServer)
 
-	return rpcServer, nil
+	return server, nil
 }
 
-func (s *RpcServer) Start() error {
+func (s *Server) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
 }

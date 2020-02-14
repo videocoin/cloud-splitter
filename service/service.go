@@ -8,12 +8,12 @@ import (
 
 type Service struct {
 	cfg *Config
-	rpc *rpc.RpcServer
+	rpc *rpc.Server
 	eb  *eventbus.EventBus
 }
 
 func NewService(cfg *Config, streams pstreamsv1.StreamsServiceClient) (*Service, error) {
-	rpcConfig := &rpc.RpcServerOpts{
+	rpcConfig := &rpc.ServerOpts{
 		HlsDir:      cfg.HLSDir,
 		Addr:        cfg.RPCAddr,
 		Logger:      cfg.Logger.WithField("system", "rpc"),
@@ -31,7 +31,7 @@ func NewService(cfg *Config, streams pstreamsv1.StreamsServiceClient) (*Service,
 		return nil, err
 	}
 
-	rpc, err := rpc.NewRpcServer(rpcConfig)
+	rpc, err := rpc.NewServer(rpcConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +46,11 @@ func NewService(cfg *Config, streams pstreamsv1.StreamsServiceClient) (*Service,
 }
 
 func (s *Service) Start() error {
-	go s.rpc.Start()
-	go s.eb.Start()
+	go s.rpc.Start()  //nolint
+	go s.eb.Start()  //nolint
 	return nil
 }
 
 func (s *Service) Stop() error {
-	s.eb.Stop()
-	return nil
+	return s.eb.Stop()
 }
