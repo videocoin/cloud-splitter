@@ -62,6 +62,15 @@ func (sm *MockPrivateStreamManager) Stop(
 	return &stream, nil
 }
 
+func (sm *MockPrivateStreamManager) Complete(
+	context.Context, *pstreamsv1.StreamRequest, ...grpc.CallOption,
+) (*pstreamsv1.StreamResponse, error) {
+	stream := pstreamsv1.StreamResponse{
+		ID: sm.id,
+	}
+	return &stream, nil
+}
+
 func (sm *MockPrivateStreamManager) UpdateStatus(
 	context.Context, *pstreamsv1.UpdateStatusRequest, ...grpc.CallOption,
 ) (*pstreamsv1.StreamResponse, error) {

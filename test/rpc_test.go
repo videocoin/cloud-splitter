@@ -29,7 +29,7 @@ var (
 type APITestSuite struct {
 	suite.Suite
 	svc    *service.Service
-	rpc    *rpc.RpcServer
+	rpc    *rpc.Server
 	config *service.Config
 }
 
@@ -50,7 +50,7 @@ func (suite *APITestSuite) SetupSuite() {
 	suite.config.Logger = log
 	privateStreamManager := new(MockPrivateStreamManager)
 
-	rpcConfig := &rpc.RpcServerOpts{
+	rpcConfig := &rpc.ServerOpts{
 		HlsDir:      suite.config.HLSDir,
 		Addr:        suite.config.RPCAddr,
 		Logger:      suite.config.Logger.WithField("system", "rpc"),
@@ -58,7 +58,7 @@ func (suite *APITestSuite) SetupSuite() {
 		SegmentTime: suite.config.SegmentTime,
 	}
 
-	suite.rpc, err = rpc.NewRpcServer(rpcConfig)
+	suite.rpc, err = rpc.NewServer(rpcConfig)
 	require.NoError(suite.T(), err)
 
 }
@@ -68,7 +68,7 @@ func TestAPITestSuite(t *testing.T) {
 }
 
 func (suite *APITestSuite) TestSplit() {
-	req := &splitterv1.SplitRequest{Filepath: "testdata/small.mp4", StreamID: STREAM_ID}
+	req := &splitterv1.SplitRequest{Filepath: "testdata/small.mp4", StreamID: StreamID}
 	span, _ := opentracing.StartSpanFromContext(context.Background(), "test")
 	defer span.Finish()
 	ctx := opentracing.ContextWithSpan(context.Background(), span)
@@ -78,7 +78,7 @@ func (suite *APITestSuite) TestSplit() {
 		assert.FailNow(suite.T(), err.Error())
 	}
 	assert.Equal(suite.T(), &protoempty.Empty{}, resp)
-	if _, err := os.Stat(filepath.Join(suite.config.HLSDir, STREAM_ID)); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(suite.config.HLSDir, StreamID)); os.IsNotExist(err) {
 		assert.FailNow(suite.T(), err.Error())
 	}
 
