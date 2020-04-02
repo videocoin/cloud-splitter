@@ -29,8 +29,7 @@ deps:
 tests:
 	docker build -t tests -f Dockerfile.test .
 
-lint:
-	golangci-lint run -v --timeout 120s
+lint: docker-lint
 
 docker-lint:
 	docker build -f Dockerfile.lint .
