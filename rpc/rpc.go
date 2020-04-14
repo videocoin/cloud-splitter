@@ -70,8 +70,9 @@ func (s *Server) splitMediafile(filepath string, hlsDir string) error {
 	s.logger.Infof("ffmpeg: %s", strings.Join(args, " "))
 
 	cmd := exec.Command("ffmpeg", args...)
-	_, err := cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
+		s.logger.Error(string(out))
 		return err
 	}
 
