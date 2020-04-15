@@ -35,6 +35,12 @@ func (s *Server) Split(ctx context.Context, req *splitterv1.SplitRequest) (*prot
 		err := s.splitMediafile(filepath, hlsDir)
 		if err != nil {
 			logger.Errorf("failed to split media file: %s", err)
+
+			_, stopErr := s.streams.Stop(context.Background(), &pstreamsv1.StreamRequest{Id: req.StreamID})
+			if stopErr != nil {
+				logger.Errorf("failed to stop stream: %s", err)
+			}
+
 			return
 		}
 
