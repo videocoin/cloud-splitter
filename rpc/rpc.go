@@ -7,10 +7,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
+	"github.com/vansante/go-ffprobe"
 	splitterv1 "github.com/videocoin/cloud-api/splitter/v1"
 	pstreamsv1 "github.com/videocoin/cloud-api/streams/private/v1"
 )
@@ -46,10 +48,57 @@ func (s *Server) Split(ctx context.Context, req *splitterv1.SplitRequest) (*prot
 
 		logger.Info("split has been completed")
 
-		streamReq := &pstreamsv1.StreamRequest{Id: req.StreamID}
+		mediadata, err := ffprobe.GetProbeData(filepath, time.Second*5)
+		if err != nil {
+			logger.Errorf("failed to get probe data: %s", err)
+
+			_, stopErr := s.streams.Stop(context.Background(), &pstreamsv1.StreamRequest{Id: req.StreamID})
+			if stopErr != nil {
+				logger.Errorf("failed to stop stream: %s", err)
+			}
+
+			return
+		}
+
+		stream := mediadata.GetFirstVideoStream()
+		if stream == nil {
+			logger.Errorf("failed to get stream data: %s", err)
+
+			_, stopErr := s.streams.Stop(context.Background(), &pstreamsv1.StreamRequest{Id: req.StreamID})
+			if stopErr != nil {
+				logger.Errorf("failed to stop stream: %s", err)
+			}
+
+			return
+		}
+
+		duration, err := strconv.ParseFloat(stream.Duration, 64)
+		if err != nil {
+			logger.Errorf("failed to parse duration: %s", err)
+
+			_, stopErr := s.streams.Stop(context.Background(), &pstreamsv1.StreamRequest{Id: req.StreamID})
+			if stopErr != nil {
+				logger.Errorf("failed to stop stream: %s", err)
+			}
+
+			return
+		}
+
+		logger.Infof("duration is %f", duration)
+
+		streamReq := &pstreamsv1.StreamRequest{
+			Id:       req.StreamID,
+			Duration: duration,
+		}
 		_, err = s.streams.Publish(context.Background(), streamReq)
 		if err != nil {
 			logger.Errorf("failed to publish stream: %s", err)
+
+			_, stopErr := s.streams.Stop(context.Background(), &pstreamsv1.StreamRequest{Id: req.StreamID})
+			if stopErr != nil {
+				logger.Errorf("failed to stop stream: %s", err)
+			}
+
 			return
 		}
 
